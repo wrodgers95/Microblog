@@ -1,29 +1,13 @@
 package com.theironyard.charlotte;
 
+import java.util.ArrayList;
+
 public class User {
 
     String name;
-    String password;
+    ArrayList<String> messages = new ArrayList<>();
 
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
+    public User(String name) {
         this.name = name;
-    }
-
-    public User(String name, String password) {
-        this.name = name;
-        this.password = password;
     }
 }

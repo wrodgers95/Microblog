@@ -1,14 +1,19 @@
 <!DOCTYPE html>
 <html>
 <body>
+{{#name}}
+Hello, {{/name}}
+<form action="/logout" method="post">
+    <button type="submit">Logout</button>
+</form>
 <form action="/messages" method="post">
     <input type="text" placeholder="Enter a message" name="message"/>
     <button type="submit">Submit</button>
 </form>
 <ol>
-    {{#messageList}}
+    {{#messages}}
     <li>{{.}}</li>
-    {{/messageList}}
+    {{/messages}}
 </ol>
 </body>
 </html>

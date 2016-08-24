@@ -1,17 +1,15 @@
 package com.theironyard.charlotte;
 
 import spark.ModelAndView;
+import spark.Session;
 import spark.Spark;
 import spark.template.mustache.MustacheTemplateEngine;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 
 public class Main {
 
-    static User user;
-    static ArrayList<String> messages = new ArrayList<>();
-    static HashMap m = new HashMap();
+    static HashMap<String, User> users = new HashMap<>();
 
     public static void main(String[] args) {
 
@@ -20,37 +18,73 @@ public class Main {
         Spark.get(
 
                 "/",
-                ((request, response) -> {
-                    if (user == null) {
-                        return new ModelAndView(m, "create-user.html");
 
+                ((request, response) -> {
+                    Session session = request.session();
+                    String name = session.attribute("userName");
+                    User user = users.get(name);
+
+                    HashMap m = new HashMap<>();
+                    if (user == null) {
+                        return new ModelAndView(m, "login.html");
                     } else {
-                        m.put("userName", user.name);
-                        return new ModelAndView(m, "messages.html");
+                        return new ModelAndView(user, "home.html");
                     }
                 }),
+
                 new MustacheTemplateEngine()
         );
 
         Spark.post(
-                "/create-user",
-                ((request, response) -> {
-                    String name = request.queryParams("userName");
-                    String password = request.queryParams("password");
-                    user = new User(name, password);
-                        response.redirect("/");
-                        return "";
-                })
-        );
 
-        Spark.post(
-                "/messages",
+                "/login",
+
                 ((request, response) -> {
-                    messages.add(request.queryParams("message"));
-                    m.put("messageList", messages);
+                    String name = request.queryParams("loginName");
+                    User user = users.get(name);
+                    if (user == null) {
+                        user = new User(name);
+                        users.put(name, user);
+                    }
+
+                    Session session = request.session();
+                    session.attribute("userName", name);
+
                     response.redirect("/");
                     return "";
                 })
         );
+
+        Spark.post(
+                "/home",
+
+                ((request, response) -> {
+                    Session session = request.session();
+                    String name = session.attribute("userName");
+                    User user = users.get(name);
+
+                    if (user == null) {
+                        throw new Exception("User is not logged in");
+                    }
+
+                    user.messages.add(request.queryParams("message"));
+
+                    response.redirect("/");
+                    return "";
+                })
+        );
+
+        Spark.post(
+
+                "/logout",
+
+                ((request, response) -> {
+                    Session session = request.session();
+                    session.invalidate();
+                    response.redirect("/");
+                    return "";
+                })
+        );
+
     }
 }
